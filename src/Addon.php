@@ -1,5 +1,10 @@
 <?php
-namespace Leafcutter\Addons\MyNamespace\MyAddon;
+namespace Leafcutter\Addons\Leafcutter\Shortcodes;
+
+use Decoda\Decoda;
+use Decoda\Filter\DefaultFilter;
+use Leafcutter\Pages\PageContentEvent;
+use Leafcutter\Pages\PageEvent;
 
 class Addon extends \Leafcutter\Addons\AbstractAddon
 {
@@ -9,6 +14,37 @@ class Addon extends \Leafcutter\Addons\AbstractAddon
      * override the method `getDefaultConfig()` instead.
      */
     const DEFAULT_CONFIG = [];
+    protected $decoda;
+
+    public function onPageFileContents(string $content): string
+    {
+        return $this->parse($content);
+    }
+
+    protected function decoda($string = '') : Decoda
+    {
+        if ($this->decoda === null) {
+            $this->decoda = new Decoda('', [
+                'escapeHtml' => false,
+                'strictMode' => false,
+                'lineBreaks' => false,
+            ]);
+            //set up engine
+            $this->decoda->getEngine()->addPath(__DIR__ . '/../templates/');
+            //set up filters
+            $this->decoda->addFilter(new DefaultFilter());
+            $this->decoda->addFilter(new Filters\ImageFilter());
+            $this->decoda->addFilter(new Filters\LinkFilter());
+            $this->decoda->addFilter(new Filters\GalleryFilter());
+        }
+        $this->decoda->reset($string);
+        return $this->decoda;
+    }
+
+    public function parse($string): string
+    {
+        return $this->decoda($string)->parse();
+    }
 
     /**
      * Method is executed as the first step when this Addon is activated.
@@ -28,7 +64,7 @@ class Addon extends \Leafcutter\Addons\AbstractAddon
      */
     public function getEventSubscribers(): array
     {
-        return [];
+        return [$this];
     }
 
     /**
@@ -40,7 +76,7 @@ class Addon extends \Leafcutter\Addons\AbstractAddon
      */
     public static function provides(): array
     {
-        return [];
+        return ['shortcodes'];
     }
 
     /**

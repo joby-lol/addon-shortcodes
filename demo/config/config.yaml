@@ -1,9 +1,13 @@
 site:
-  url: 'http://localhost/addon-template/demo/'
+  url: 'http://leafcutter.test/addon-shortcodes/demo/'
 
 theme:
   activate:
     - core/basic
+
+addons:
+  activate:
+    - shortcodes
 
 templates:
   site:
